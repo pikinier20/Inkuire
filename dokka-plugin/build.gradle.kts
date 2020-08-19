@@ -23,7 +23,7 @@ dependencies {
     testImplementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
     testImplementation("org.jetbrains.dokka:dokka-test-api:$dokkaVersion")
     implementation("junit:junit:4.13")
-    implementation(project(":inkuire-common"))
+    implementation(project(":common"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8-1.4.0-rc")
 }
 

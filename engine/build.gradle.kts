@@ -10,9 +10,6 @@ plugins {
 repositories {
     jcenter()
     mavenCentral()
-    maven {
-        url = uri("http://dl.bintray.com/kotlin/kotlin-dev")
-    }
 }
 
 dependencies {
@@ -49,7 +46,7 @@ dependencies {
 
     implementation("com.lihaoyi:scalatags_2.13:0.9.1")
 
-    implementation(project(":inkuire-common"))
+    implementation(project(":common"))
 }
 
 application.mainClassName = "org.virtuslab.inkuire.engine.Main"
