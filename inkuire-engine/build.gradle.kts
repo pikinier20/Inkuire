@@ -57,6 +57,28 @@ dependencies {
 
 application.mainClassName = "org.virtuslab.inkuire.engine.Main"
 
+val fatJar = task("fatJar", type = Jar::class) {
+    baseName = "${project.name}-fatJar"
+    manifest {
+        attributes["Main-Class"] = "org.virtuslab.inkuire.engine.Main"
+    }
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    with(tasks.jar.get() as CopySpec)
+}
+
+//tasks.register("runStdlib") {
+//    dependsOn(tasks.build.get())
+//    doLast{
+//        val pathToDb = System.getenv("DB_PATH")
+//        tasks.run.get().setArgsString("" +
+//                "-d $pathToDb/functionskotlin-stdlib-common.json " +
+//                "-d $pathToDb/functionskotlin-stdlib-java-common.json " +
+//                "-a $pathToDb/ancestryGraphkotlin-stdlib-common.json " +
+//                "-a $pathToDb/ancestryGraphkotlin-stdlib-java-common.json"
+//        ).exec()
+//    }
+//}
+
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = "1.8"

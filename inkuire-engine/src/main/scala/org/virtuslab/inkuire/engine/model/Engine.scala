@@ -10,7 +10,8 @@ object Engine {
     db:         InkuireDb,
     matcher:    BaseMatchService,
     prettifier: SignaturePrettifier,
-    parser:     BaseSignatureParserService
+    parser:     BaseSignatureParserService,
+    port: Int
   )
 
   type Engine[A] = StateT[IO, Env, A]

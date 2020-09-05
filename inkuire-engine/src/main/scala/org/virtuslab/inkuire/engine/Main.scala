@@ -22,7 +22,7 @@ object Main extends App {
       out
         .serveOutput()
         .runA(
-          Env(db, matchService(db), prettifier, parser)
+          Env(db, matchService(db), prettifier, parser, db.port)
         )
     }
     .fold(println("Oooooh man, bad luck. Inkuire encountered an unexpected error :/"))(identity)

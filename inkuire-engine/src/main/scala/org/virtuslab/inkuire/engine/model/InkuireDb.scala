@@ -1,16 +1,13 @@
 package org.virtuslab.inkuire.engine.model
 
-import java.io.{File, FileReader}
+import java.io.{BufferedReader, File, FileReader, InputStreamReader}
+import java.net.URL
 
 import com.google.gson.{JsonIOException, JsonSyntaxException}
 import com.google.gson.reflect.TypeToken
 import org.virtuslab.inkuire.engine.service.DefaultDokkaModelTranslationService.translateDRI
 import org.virtuslab.inkuire.model._
-import org.virtuslab.inkuire.engine.service.{
-  DefaultDokkaModelTranslationService,
-  DokkaModelTranslationService,
-  KotlinExternalSignaturePrettifier
-}
+import org.virtuslab.inkuire.engine.service.{DefaultDokkaModelTranslationService, DokkaModelTranslationService, KotlinExternalSignaturePrettifier}
 import org.virtuslab.inkuire.model.util.CustomGson
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
@@ -18,7 +15,8 @@ import com.softwaremill.quicklens._
 
 case class InkuireDb(
   functions: Seq[ExternalSignature],
-  types:     Map[DRI, (Type, Seq[Type])]
+  types:     Map[DRI, (Type, Seq[Type])],
+  port: Int
 )
 
 case class DRI( // This mirror class of SDRI is done on purpose, to eliminate any future inconveniences when accessing Kotlin code from Scala
@@ -34,7 +32,7 @@ object InkuireDb {
 
   val translationService: DokkaModelTranslationService = DefaultDokkaModelTranslationService
 
-  def read(functionFiles: List[File], ancestryFiles: List[File]): Either[String, InkuireDb] = {
+  def read(functionFiles: List[URL], ancestryFiles: List[URL], port: Int): Either[String, InkuireDb] = {
     try {
 
       val ancestryGraph = ancestryFilesToTypes(ancestryFiles).populateMissingAnyAncestor
@@ -43,19 +41,19 @@ object InkuireDb {
         .populateVariances(ancestryGraph)
         .remapFunctionDRIs(ancestryGraph)
 
-      Right(new InkuireDb(functions, ancestryGraph))
+      Right(new InkuireDb(functions, ancestryGraph, port))
     } catch {
       case m: JsonSyntaxException => Left(m.getMessage)
       case m: JsonIOException     => Left(m.getMessage)
     }
   }
 
-  private def functionFilesToExternalSignatures(functionFiles: List[File]): Seq[ExternalSignature] =
+  private def functionFilesToExternalSignatures(functionFiles: List[URL]): Seq[ExternalSignature] =
     functionFiles
       .flatMap { file =>
         CustomGson.INSTANCE.getInstance
           .fromJson(
-            new FileReader(file),
+            new BufferedReader(new InputStreamReader(file.openStream())),
             new TypeToken[Array[SDFunction]] {}.getType
           )
           .asInstanceOf[Array[SDFunction]]
@@ -63,12 +61,12 @@ object InkuireDb {
       }
       .flatMap(translationService.translateFunction)
 
-  private def ancestryFilesToTypes(ancestryFiles: List[File]): Map[DRI, (Type, Seq[Type])] =
+  private def ancestryFilesToTypes(ancestryFiles: List[URL]): Map[DRI, (Type, Seq[Type])] =
     ancestryFiles
       .flatMap { file =>
         CustomGson.INSTANCE.getInstance
           .fromJson(
-            new FileReader(file),
+            new BufferedReader(new InputStreamReader(file.openStream())),
             new TypeToken[Array[AncestryGraph]] {}.getType
           )
           .asInstanceOf[Array[AncestryGraph]]

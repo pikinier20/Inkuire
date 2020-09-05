@@ -74,7 +74,7 @@ class Cli extends InputHandler with OutputHandler with IOHelpers {
   def readInput(args: Seq[String]): EitherT[IO, String, InkuireDb] = {
     parseArgs(args.toList)
       .map(CliContext.create)
-      .flatMap(ctx => InkuireDb.read(ctx.dbFiles, ctx.ancestryFiles))
+      .flatMap(ctx => InkuireDb.read(ctx.dbFiles, ctx.ancestryFiles, ctx.port))
       .traverse(value => IO { value })
       .pure[Id]
       .fmap(new EitherT(_))
